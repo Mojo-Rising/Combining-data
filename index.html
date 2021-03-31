@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- Load d3.js -->
+<script src="http://d3js.org/d3.v6.js"></script>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+
+
+  <script>
+
+
+    // set the dimensions and margins of the graph
+    const margin = { top: 10, right: 10, bottom: 10, left: 10 },
+      width = 1920 - margin.left - margin.right,
+      height = 1080 - margin.top - margin.bottom;
+
+    // The svg
+    let svg = d3.select("body").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+
+    // The group
+    let group = svg.append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // Map and projection
+    let projection = d3.geoMercator()
+      // .scale(70)
+      .center([0, 20])
+      .translate([width / 2, height / 2]);
+
+    let geoGenerator = d3.geoPath()
+      .projection(projection);
+
+    // Load external data and boot
+    d3.json("data/world.geojson").then(function(topoData) {
+      d3.csv("data/country_profile_variables.csv").then(function(countryData) {
+
+        console.log(topoData);
+
+        var colorScale = d3.scaleThreshold()
+          .domain([100000, 1000000, 10000000, 30000000, 100000000, 500000000])
+          .range(d3.schemeBlues[7]);
+        
+        let mouseOver = function (d) {
+          d3.selectAll(".Country")
+            .transition()
+            .duration(200)
+            .style("opacity", .5)
+            .transition()
+            .duration(200)
+            .style("stroke", "transparent")
+          d3.select(this)
+            .transition()
+            .duration(200)
+            .style("opacity", 1)
+            .style("stroke", "black")
+        }
+
+        let mouseLeave = function (d) {
+          d3.selectAll(".Country")
+            .transition()
+            .duration(200)
+            .style("opacity", .8)
+            .transition()
+            .duration(200)
+            .style("stroke", "transparent")
+        }
+
+        // Draw the map
+        svg.append("g")
+          .selectAll("path")
+          .data(topoData.features)
+          .enter()
+          .append("path")
+          // draw each country
+          .attr("d", d3.geoPath()
+            .projection(projection)
+          )
+          // set the color of each country
+          .attr("fill", function (d) {
+            0
+          })
+          .style("stroke", "transparent")
+          .attr("class", function (d) { return "Country" })
+          .style("opacity", .8)
+          .on("mouseover", mouseOver)
+          .on("mouseleave", mouseLeave)
+
+      });
+    });
+
+  </script>
+
+</body>
+
+</html>
